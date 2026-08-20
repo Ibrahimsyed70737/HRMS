@@ -21,6 +21,8 @@ import com.hrms.hrms_backend.entity.Employee;
 import com.hrms.hrms_backend.mapper.EmployeeMapper;
 import com.hrms.hrms_backend.service.EmployeeService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/employees")
 public class EmployeeController {
@@ -33,7 +35,7 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public ResponseEntity<EmployeeDTO> create(@RequestBody EmployeeCreateRequest request) {
+    public ResponseEntity<EmployeeDTO> create(@Valid @RequestBody EmployeeCreateRequest request) {
         Employee employee = new Employee();
         employee.setName(request.getName());
         employee.setEmail(request.getEmail());

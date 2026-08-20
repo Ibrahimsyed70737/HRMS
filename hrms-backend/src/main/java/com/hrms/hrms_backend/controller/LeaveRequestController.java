@@ -21,6 +21,8 @@ import com.hrms.hrms_backend.entity.LeaveRequest;
 import com.hrms.hrms_backend.mapper.LeaveRequestMapper;
 import com.hrms.hrms_backend.service.LeaveRequestService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/leave-requests")
 public class LeaveRequestController {
@@ -35,7 +37,7 @@ public class LeaveRequestController {
     // Note: employeeId is a query param for now (no auth yet — Phase 6 will replace this
     // with "get current logged-in user" instead of trusting a client-passed ID).
     @PostMapping
-    public ResponseEntity<LeaveRequestDTO> apply(@RequestBody LeaveRequestCreateRequest request,
+    public ResponseEntity<LeaveRequestDTO> apply(@Valid @RequestBody LeaveRequestCreateRequest request,
                                                    @RequestParam Long employeeId) {
         LeaveRequest leaveRequest = new LeaveRequest();
         leaveRequest.setLeaveType(request.getLeaveType());
