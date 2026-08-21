@@ -54,6 +54,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
+    @ExceptionHandler(org.springframework.security.authentication.BadCredentialsException.class)
+public ResponseEntity<ErrorResponse> handleBadCredentials(org.springframework.security.authentication.BadCredentialsException ex) {
+    ErrorResponse error = new ErrorResponse(
+            LocalDateTime.now(), HttpStatus.UNAUTHORIZED.value(),
+            "Unauthorized", "Invalid username or password", null);
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+}
+
+
     // Catch-all safety net — anything unexpected still returns clean JSON, never a raw stack trace
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {

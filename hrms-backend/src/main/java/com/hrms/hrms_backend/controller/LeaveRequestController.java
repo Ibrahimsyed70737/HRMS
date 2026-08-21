@@ -20,6 +20,7 @@ import com.hrms.hrms_backend.dto.LeaveRequestDTO;
 import com.hrms.hrms_backend.entity.LeaveRequest;
 import com.hrms.hrms_backend.mapper.LeaveRequestMapper;
 import com.hrms.hrms_backend.service.LeaveRequestService;
+import com.hrms.hrms_backend.security.SecurityUtils;
 
 import jakarta.validation.Valid;
 
@@ -27,26 +28,27 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/leave-requests")
 public class LeaveRequestController {
 
+    private final SecurityUtils securityUtils;
     private final LeaveRequestService leaveRequestService;
 
     @Autowired
-    public LeaveRequestController(LeaveRequestService leaveRequestService) {
+    public LeaveRequestController(LeaveRequestService leaveRequestService, SecurityUtils securityUtils) {
         this.leaveRequestService = leaveRequestService;
+        this.securityUtils = securityUtils;
     }
 
     // Note: employeeId is a query param for now (no auth yet — Phase 6 will replace this
     // with "get current logged-in user" instead of trusting a client-passed ID).
     @PostMapping
-    public ResponseEntity<LeaveRequestDTO> apply(@Valid @RequestBody LeaveRequestCreateRequest request,
-                                                   @RequestParam Long employeeId) {
-        LeaveRequest leaveRequest = new LeaveRequest();
-        leaveRequest.setLeaveType(request.getLeaveType());
-        leaveRequest.setStartDate(request.getStartDate());
-        leaveRequest.setEndDate(request.getEndDate());
-
-        LeaveRequest saved = leaveRequestService.apply(leaveRequest, employeeId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(LeaveRequestMapper.toDTO(saved));
-    }
+public ResponseEntity<LeaveRequestDTO> apply(@Valid @RequestBody LeaveRequestCreateRequest request) {
+    Long employeeId = securityUtils.getCurrentEmployeeId(); // no longer from query param
+    LeaveRequest leaveRequest = new LeaveRequest();
+    leaveRequest.setLeaveType(request.getLeaveType());
+    leaveRequest.setStartDate(request.getStartDate());
+    leaveRequest.setEndDate(request.getEndDate());
+    LeaveRequest saved = leaveRequestService.apply(leaveRequest, employeeId);
+    return ResponseEntity.status(HttpStatus.CREATED).body(LeaveRequestMapper.toDTO(saved));
+}
 
     @GetMapping("/{id}")
     public ResponseEntity<LeaveRequestDTO> getById(@PathVariable Long id) {
@@ -70,12 +72,14 @@ public class LeaveRequestController {
     }
 
     @PutMapping("/{id}/approve")
-    public ResponseEntity<LeaveRequestDTO> approve(@PathVariable Long id, @RequestParam Long approverId) {
-        return ResponseEntity.ok(LeaveRequestMapper.toDTO(leaveRequestService.approve(id, approverId)));
-    }
+public ResponseEntity<LeaveRequestDTO> approve(@PathVariable Long id) {
+    Long approverId = securityUtils.getCurrentEmployeeId();
+    return ResponseEntity.ok(LeaveRequestMapper.toDTO(leaveRequestService.approve(id, approverId)));
+}
 
-    @PutMapping("/{id}/reject")
-    public ResponseEntity<LeaveRequestDTO> reject(@PathVariable Long id, @RequestParam Long approverId) {
-        return ResponseEntity.ok(LeaveRequestMapper.toDTO(leaveRequestService.reject(id, approverId)));
-    }
+@PutMapping("/{id}/reject")
+public ResponseEntity<LeaveRequestDTO> reject(@PathVariable Long id) {
+    Long approverId = securityUtils.getCurrentEmployeeId();
+    return ResponseEntity.ok(LeaveRequestMapper.toDTO(leaveRequestService.reject(id, approverId)));
+}
 }
