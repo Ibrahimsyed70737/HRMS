@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,7 +31,7 @@ public class DepartmentController {
     public DepartmentController(DepartmentService departmentService) {
         this.departmentService = departmentService;
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<DepartmentDTO> create(@RequestBody DepartmentDTO request) {
         Department department = new Department();
@@ -51,7 +52,7 @@ public class DepartmentController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(departments);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<DepartmentDTO> update(@PathVariable Long id, @RequestBody DepartmentDTO request) {
         Department updated = new Department();
@@ -59,7 +60,7 @@ public class DepartmentController {
         Department saved = departmentService.update(id, updated);
         return ResponseEntity.ok(DepartmentMapper.toDTO(saved));
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         departmentService.delete(id);

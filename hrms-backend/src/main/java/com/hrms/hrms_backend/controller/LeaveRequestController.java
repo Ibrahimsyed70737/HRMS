@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -63,6 +64,7 @@ public ResponseEntity<LeaveRequestDTO> apply(@Valid @RequestBody LeaveRequestCre
         return ResponseEntity.ok(requests);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @GetMapping("/pending")
     public ResponseEntity<List<LeaveRequestDTO>> getPending() {
         List<LeaveRequestDTO> requests = leaveRequestService.getPending().stream()
@@ -71,12 +73,13 @@ public ResponseEntity<LeaveRequestDTO> apply(@Valid @RequestBody LeaveRequestCre
         return ResponseEntity.ok(requests);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @PutMapping("/{id}/approve")
 public ResponseEntity<LeaveRequestDTO> approve(@PathVariable Long id) {
     Long approverId = securityUtils.getCurrentEmployeeId();
     return ResponseEntity.ok(LeaveRequestMapper.toDTO(leaveRequestService.approve(id, approverId)));
 }
-
+@PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
 @PutMapping("/{id}/reject")
 public ResponseEntity<LeaveRequestDTO> reject(@PathVariable Long id) {
     Long approverId = securityUtils.getCurrentEmployeeId();
